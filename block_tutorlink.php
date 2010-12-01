@@ -3,9 +3,7 @@
 class block_tutorlink extends block_base {
 
     function init() {
-        $this->title = get_string('blockname','block_tutorlink');
-        $this->content_type = BLOCK_TYPE_TEXT;
-        $this->version = 2009051500;
+        $this->title = get_string('pluginname', 'block_tutorlink');
         $this->cron=300;        
     }
 
