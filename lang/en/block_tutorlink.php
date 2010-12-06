@@ -1,6 +1,9 @@
 <?php
 
-$string['csvfile']         = 'CSV file (1 row per relationship: tutor idnumber,tutee idnumber)';
+$string['blocksettings'] = 'Block Settings';
+$string['csvfile']         = 'Select CSV file';
+$string['csv']         = 'CSV File';
+$string['csv_help']         = 'The file should be in CSV (comma-seperated value) format. Each assignment should be on 1 row, with 3 columns: operation (add or del), user idnumber, user context idnumber). For example, to add user with idnumber 1234 to the user context of the user with idnumber 4321, the line would read: add, 1234, 4321';
 $string['cronfile']         = 'Location of file for automatic processing';
 $string['cronfiledesc']         = 'If you enter a file location in here, it will be periodically checked for a file to process automatically.';
 $string['cronprocessed']    =   'Processed file location';
@@ -8,7 +11,7 @@ $string['keepprocessed']    = 'Keep Processed files';
 $string['keepprocessedlong']    =   'If checked, processed files will be stored in the location below.';
 $string['keepprocessedfor']    = 'Days to keep processed files for';
 $string['nopermission']         = 'You do not have permission to upload tutor relationships';
-$string['notutorrole'] = 'Before you use this block, you must select a tutor role <a href=\"$a\">here</a>';
+$string['notutorrole']  =   'Before you use this block, you must select a tutor role in the ';
 $string['pluginname']         = 'Upload tutor relationships';
 $string['pluginnameplural']         = 'Upload tutor relationships';
 $string['reladded']         = 'Relationship sucessfully created';

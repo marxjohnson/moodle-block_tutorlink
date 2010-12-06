@@ -13,24 +13,45 @@ class block_tutorlink extends block_base {
     function has_config() {return true;}
 
     function get_content () {
+        if ($this->content !== null) {
+            return $this->content;
+        }
+
         $this->content->footer='';
         $this->content->text='';
         global $CFG;
         global $USER;
+        global $OUTPUT;
         $context = get_context_instance(CONTEXT_SYSTEM);
        //only let people with permission use the block- everyone else will get an empty string
        if (has_capability('block/tutorlink:use', $context)) {
             //check that there is a tutor role configured
-            if(get_config('block/tutorlink','tutorrole')===false){
-                $this->content->text.=get_string('notutorrole','block_tutorlink',$CFG->wwwroot.'/admin/settings.php?section=blocksettingtutorlink');
-            }else{
-                $this->content->text.= get_string('csvfile','block_tutorlink');
-                $this->content->text.='<form target="blank" action="'.$CFG->wwwroot.'/blocks/tutorlink/process.php" method="post" enctype="multipart/form-data"><input type="file" name="csvfile"><input type="submit"></form>';
-                         
+            if (get_config('block/tutorlink','tutorrole') === false) {
+                $url = new moodleurl('/admin/settings.php', array('section' => 'blocksettingtutorlink'));
+                $this->content->text .= get_string('notutorrole', 'block_tutorlink');
+                $this->content->text .= html_writer::tag('a', get_string('blocksettings', 'block_tutorlink'), array('href' => $url->out(false)));
+            } else {
+                $this->content->text.= get_string('csvfile', 'block_tutorlink');
+                $this->content->text .= $OUTPUT->help_icon('csv', 'block_tutorlink');
+                $actionurl = new moodle_url('/blocks/tutorlink/process.php');
+                $form = html_writer::start_tag('form', array('action' => $actionurl->out(false), 'method' => 'post', 'enctype' => 'multipart/form-data'));                
+                $form .= html_writer::empty_tag('input', array('type' => 'file', 'name' => 'csvfile', 'id' => 'tutorlink_file'));
+                $form .= html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'submit', 'value' => get_string('submit')));
+                $form .= html_writer::end_tag('form');
+                $this->content->text.= $form;            
             }
        }
 
-        return $this->content;
+       $jsmodule = array(
+            'name'  =>  'block_tutorlink',
+            'fullpath'  =>  '/blocks/tutorlink/module.js',
+            'requires'  =>  array('base', 'node', 'json', 'io')
+       );
+
+       $this->page->requires->string_for_js('select', 'moodle');
+       $this->page->requires->js_init_call('M.block_tutorlink.init', null, false, $jsmodule);
+
+       return $this->content;
     }
     function cron(){
         global $CFG;
