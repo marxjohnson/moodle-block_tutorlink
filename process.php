@@ -4,21 +4,32 @@
 require_once('../../config.php');
 require_once($CFG->dirroot.'/blocks/tutorlink/locallib.php');
 
-//$csvfilename=required_param('csvfile',PARAM_FILE);
+$courseid = required_param('courseid', PARAM_INT);
+if (!$course = $DB->get_record('course', array('id' => $courseid))) {
+    print_error('invalidcourseid');
+}
+$url = new moodle_url('/blocks/tutorlink/process.php', array('courseid' => $course->id));
 
-global $CFG;
-global $USER;
-$context = get_context_instance(CONTEXT_SYSTEM);
-if (!has_capability('block/tutorlink:use', $context)) {
+$PAGE->set_url($url);
+
+require_login($course);
+
+$PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+
+if (!has_capability('block/tutorlink:use', $PAGE->context)) {
     print_error('nopermission','block_tutorlink');
 }
 
-$cfg_tutorlink = get_config('block/tutorlink');
-
 //make sure that there is a tutorrole configured before we go assigning it
-if(!$tutorrole=$cfg_tutorlink->tutorrole){
-    echo get_string('notutorrole','block_tutorlink');
-}else{
-    echo block_tutorlink_processfile($_FILES['csvfile']['tmp_name']);
+if (get_config('block/tutorlink','tutorrole') === false) {
+    print_error('notutorrole','block_tutorlink');
+} else {
+    $report = block_tutorlink_processfile($_FILES['csvfile']['tmp_name']);
 }
+
+$PAGE->set_title('Create Tutor Assignments');
+$PAGE->set_heading('Create Tutor Assignments');
+echo $OUTPUT->header();
+echo $report;
+echo $OUTPUT->footer($course);
 ?>
