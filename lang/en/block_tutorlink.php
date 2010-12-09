@@ -2,6 +2,7 @@
 
 $string['blocksettings'] = 'Block Settings';
 $string['cantremoveold'] = 'Old cron file $a couldn\'t be removed. Please check file permissions.';
+$string['cantreadcsv']  =   'Unable to read CSV file';
 $string['csvfile']         = 'Select CSV file';
 $string['csv']         = 'CSV File';
 $string['csv_help']         = 'The file should be in CSV (comma-seperated value) format. Each assignment should be on 1 row, with 3 columns: operation (add or del), user idnumber, user context idnumber). For example, to add user with idnumber 1234 to the user context of the user with idnumber 4321, the line would read: add, 1234, 4321';
@@ -26,6 +27,8 @@ $string['relalreadyexists']         = '{$a->tutor} already assigned to {$a->stud
 $string['reladderror']         = 'Error assigning {$a->tutor} to {$a->student}';
 $string['reldeleted']         = '{$a->tutor} unassigned from {$a->student}';
 $string['removedold']   = 'Removed {$a} old cron files';
+$string['toofewcols']   =   'CSV file has too few columns on line {$a}, expecting 3.';
+$string['toomanycols']   =   'CSV file has too many columns on line {$a}, expecting 3.';
 $string['tutorrole']         = 'Tutor role';
 $string['tutorrole_explain']         = 'This is the role that the tutors will be assigned in the students\' user context';
 $string['tutornotfound']         = 'Line {$a->line}: Tutor not found';
