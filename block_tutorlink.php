@@ -15,7 +15,7 @@ class block_tutorlink extends block_base {
         if ($this->content !== null) {
             return $this->content;
         }
-
+        
         $this->content->footer='';
         $this->content->text='';
         global $CFG;
@@ -59,7 +59,7 @@ class block_tutorlink extends block_base {
        
        $this->page->requires->string_for_js('upload', 'moodle');
        $this->page->requires->string_for_js('pluginname', 'block_tutorlink');
-      // $this->page->requires->js_init_call('M.block_tutorlink.init', $jsdata, false, $jsmodule);
+       $this->page->requires->js_init_call('M.block_tutorlink.init', $jsdata, false, $jsmodule);
 
        return $this->content;
     }

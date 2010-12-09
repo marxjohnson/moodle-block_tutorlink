@@ -1,32 +1,73 @@
 M.block_tutorlink = {
-    init: function(Y) {
+
+    overlay: '',
+
+    init: function(Y, courseid, userid, sesskey, sname, sid) {
         this.Y = Y;
+        this.courseid = courseid;
+        this.userid =   userid;
+        this.sname = sname;
+        this.sid = sid;
+        this.sesskey = sesskey;
+        this.fakeinput = Y.Node.create('<input class="fakefile" />');        
+        this.fileid = null;
         inputs = Y.Node.create('<div class="fileinputs" />');
-        realinput = Y.Node.create('<input type="file" name="csvfile" class="file" />');
-        fakefile = Y.Node.create('<div class="fakefile" />');
-        this.fakeinput = Y.Node.create('<input />');
-        fakebutton = Y.Node.create('<span id="tutorlink_selectfile" class="button_off">'+M.util.get_string('select', 'moodle')+'</span>');
-        inputs.appendChild(realinput);
-        fakefile.appendChild(this.fakeinput);
-        fakefile.appendChild(fakebutton);
-        inputs.appendChild(fakefile);
-        Y.one('#tutorlink_file').replace(inputs);
+        this.selectbutton = Y.Node.create('<div class="flashbutton" />');
+        this.uploadbutton = Y.Node.create('<input type="button" class="button" value="'+M.util.get_string('upload', 'moodle')+'" />');
+        uploaddiv = Y.Node.create('<div class="Yuploader" />');        
+        uploaddiv.appendChild(this.selectbutton);
+        uploaddiv.appendChild(this.fakeinput)
+        uploaddiv.appendChild(this.uploadbutton);
+        Y.one('#tutorlink_form').replace(uploaddiv);
 
-        Y.on('change', this.get_path, realinput);
-        Y.on('mousedown', this.button_press, realinput);
-        Y.on('mouseup', this.button_press, realinput);
-    },
+        this.uploader = new Y.Uploader({boundingBox: this.selectbutton,
+                                        buttonSkin:M.cfg.wwwroot+'/blocks/tutorlink/pix/select.png',
+					transparent: false});
 
-    get_path: function(e) {
-        path = e.target.get('value');
-        M.block_tutorlink.show_filename(path);
-    },
+        this.uploader.on("uploaderReady", function(e) {
+            var file_filters = new Array({description:'Comma-Separated Values (CSV)', extensions:"*.csv;*.txt"});
+            e.target.set("fileFilters", file_filters);
+        });
 
-    button_press: function(e) {
-        Y = M.block_tutorlink.Y;
-        button = Y.one('#tutorlink_selectfile');                
-        button.toggleClass('button_on');
-        button.toggleClass('button_off');
+
+        this.uploader.on("fileselect", function(e) {
+            var file_data = e.fileList;
+            for (var key in file_data) {
+                    M.block_tutorlink.show_filename(file_data[key].name);
+                    M.block_tutorlink.fileid = file_data[key].id;
+            }
+        });
+
+        this.uploader.on('uploadcompletedata', function(e) {
+            M.block_tutorlink.show_response(e.data);
+        });
+
+        this.uploader.on('uploaderror', function(e) {
+            M.block_tutorlink.show_response(e.status);
+        });
+
+        this.uploadbutton.on("click", function() {
+            M.block_tutorlink.upload_file();
+            M.block_tutorlink.show_response('<img src="'+M.cfg.loadingicon+'" class="spinner" />');
+        });
+
+        this.overlay_close = Y.Node.create('<a id="block_tutorlink_output_header" href="#"><img  src="'+M.util.image_url('t/delete', 'moodle')+'" /></a>');
+        // Create an overlay from markup
+        this.overlay = new Y.Overlay({
+            headerContent: this.overlay_close,
+            bodyContent: '',
+            id: 'block_tutorlink_output',
+            width:'400px',
+            visible : false,
+            constrain : true
+        });
+        this.overlay.render(Y.one(document.body));
+
+        this.overlay_close.on('click', this.overlay.hide, this.overlay);
+
+        Y.on("key", this.hide_response, this.overlay_close, "down:13", this);
+        this.overlay_close.on('click', this.hide_response, this);
+
     },
 
     show_filename: function(path) {
@@ -38,6 +79,24 @@ M.block_tutorlink = {
             filename = path;
         }
         this.fakeinput.set('value', filename);
+    },
+
+    upload_file: function() {
+        this.uploader.upload(this.fileid, M.cfg.wwwroot+'/blocks/tutorlink/process_async.php', 'post', {userid: this.userid, sesskey: this.sesskey, sname: this.sname, sid: this.sid});
+    },
+    
+    show_response: function(data) {
+        Y = this.Y;
+        header = '<h1 class="heading">'+M.util.get_string('pluginname', 'block_tutorlink')+'</h1>';
+        this.overlay.set('bodyContent', Y.Node.create(header+'<p>'+data+'</p>'));
+        this.overlay.set("align", {node:this.uploadbutton, points:[Y.WidgetPositionAlign.TL, Y.WidgetPositionAlign.RC]});
+        this.overlay.show();
+        this.overlay_close.focus();
+    },
+
+    hide_response: function() {
+        this.overlay.hide();
     }
+
     
 }

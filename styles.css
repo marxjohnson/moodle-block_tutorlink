@@ -1,49 +1,61 @@
-.block_tutorlink div.fileinputs {
-	position: relative;
-}
-
-.block_tutorlink div.fakefile {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	z-index: 1;
-}
-
-.block_tutorlink div.fakefile input {
-        width: 112px;
-}
-
 #tutorlink_selectfile {
     background-color: #ddd;
     margin-left: 0.2em;
     padding: 0.1em;
 }
 
-.block_tutorlink .button_off, .block_tutorlink .button_on {
-    border-style: solid;
-    border-width: 2px;
+.block_tutorlink .fakefile {
+    width: 110px;
 }
 
-.block_tutorlink .button_off {
+.block_tutorlink .button {
+    color: black;
+    background-color: #ddd;
+    border-style: solid;
+    border-width: 2px;
+    padding-left: 0.1em;
+    padding-right: 0.1em;
     border-bottom-color: gray;
     border-right-color: gray;
     border-top-color: #ddd;
     border-left-color: #ddd;
+    margin-top: 0.1em;
 }
 
-.block_tutorlink .button_on {
+.block_tutorlink .button:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.block_tutorlink .button:active {
     border-top-color: gray;
     border-left-color: gray;
     border-bottom-color: #ddd;
     border-right-color: #ddd;
 }
 
-.block_tutorlink input.file {
-	position: relative;
-	text-align: right;
-	-moz-opacity:0 ;
-	filter:alpha(opacity:0);
-	opacity: 0;
-	z-index: 2;
-        width: 200px;
+.block_tutorlink .flashbutton {
+    width: 45px;
+    height: 19px;
+    float: right;
+}
+
+#block_tutorlink_output {
+    background-color: #EEEEEE;
+    border: 1px solid #848484;
+    z-index: 10000 !important;
+}
+
+#block_tutorlink_output .heading {
+    font-size: 1em;
+}
+
+#block_tutorlink_output .yui3-widget-hd {
+    float: right;
+    margin: 3px 3px 0 0;
+}
+
+#block_tutorlink_output .yui3-widget-bd {
+    border-top: 1px solid #EEEEEE;
+    margin: 0 1em 1em;
 }
