@@ -16,11 +16,29 @@ class block_tutorlink_handler {
         $this->filename = $filename;
     }
 
+    function open_file() {
+        global $USER;
+        if (is_file($this->filename)) {
+            if (!$file = fopen($this->filename, 'r')) {
+                throw new tutorlink_exception('cantreadcsv');
+            }
+        } else {
+            $fs = get_file_storage();
+            $context = get_context_instance(CONTEXT_USER, $USER->id);
+            if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $this->filename, 'id DESC', false)) {
+                throw new tutorlink_exception('cantreadcsv');
+            }
+            $file = reset($files);
+            if (!$file = $file->get_content_file_handle()) {
+                throw new tutorlink_exception('cantreadcsv');
+            }
+        }
+        return $file;
+    }
+
     function validate() {
         $line = 0;
-        if (!$file = fopen($this->filename, 'r')) {
-            throw new tutorlink_exception('cantreadcsv');
-        }
+        $file = $this->open_file();
         while ($csvrow = fgetcsv($file)) {
             $line++;
             if (count($csvrow) < 3) {
@@ -46,9 +64,7 @@ class block_tutorlink_handler {
 
         $line = 0;
 
-        if (!$file = fopen($this->filename, 'r')) {
-            throw new tutorlink_exception('cantreadcsv');
-        }
+        $file = $this->open_file();
 
         while ($csvrow = fgetcsv($file)) {
             $line++;

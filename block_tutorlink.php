@@ -29,16 +29,11 @@ class block_tutorlink extends block_base {
                 $url = new moodleurl('/admin/settings.php', array('section' => 'blocksettingtutorlink'));
                 $this->content->text .= get_string('notutorrole', 'block_tutorlink');
                 $this->content->text .= html_writer::tag('a', get_string('blocksettings', 'block_tutorlink'), array('href' => $url->out(false)));
-            } else {
-                $this->content->text.= get_string('csvfile', 'block_tutorlink');
-                $this->content->text .= $OUTPUT->help_icon('csv', 'block_tutorlink');
-                $actionurl = new moodle_url('/blocks/tutorlink/process.php');
-                $form = html_writer::start_tag('form', array('action' => $actionurl->out(false), 'id' => 'tutorlink_form', 'method' => 'post', 'enctype' => 'multipart/form-data'));
-                $form .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'courseid', 'value' => $this->page->course->id));
-                $form .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-                $form .= html_writer::empty_tag('input', array('type' => 'file', 'name' => 'csvfile', 'id' => 'tutorlink_file'));
-                $form .= html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'submit', 'value' => get_string('submit')));
-                $form .= html_writer::end_tag('form');
+            } else {          
+                require_once($CFG->dirroot.'/blocks/tutorlink/block_tutorlink_form.php');
+                $url = new moodle_url('/blocks/tutorlink/process.php');
+                $mform = new block_tutorlink_form($url->out());
+                $form = $mform->display();
                 $this->content->text.= $form;            
             }
        }
@@ -59,7 +54,7 @@ class block_tutorlink extends block_base {
        
        $this->page->requires->string_for_js('upload', 'moodle');
        $this->page->requires->string_for_js('pluginname', 'block_tutorlink');
-       $this->page->requires->js_init_call('M.block_tutorlink.init', $jsdata, false, $jsmodule);
+       //$this->page->requires->js_init_call('M.block_tutorlink.init', $jsdata, false, $jsmodule);
 
        return $this->content;
     }
