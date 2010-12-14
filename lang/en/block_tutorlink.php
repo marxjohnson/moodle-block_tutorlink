@@ -15,6 +15,7 @@ $string['invalidop']    = 'Line {$a->line}: Invalid operation {$a->op}';
 $string['keepprocessed']    = 'Keep Processed files';
 $string['keepprocessedlong']    =   'If checked, processed files will be stored in the location below.';
 $string['keepprocessedfor']    = 'Days to keep processed files for';
+$string['musthavefile']     =   'You must select a file';
 $string['nocronfile']   =   'Cron file doesn\'t exist.';
 $string['nodir']    =   '{$a} does not exist or is not writable. Please check folder permissions.';
 $string['nopermission']         = 'You do not have permission to upload tutor relationships.';

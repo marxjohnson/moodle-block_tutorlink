@@ -10,3 +10,27 @@
 .block_tutorlink .fitemtitle {
     width: 30% !important;
 }
+
+.block_tutorlink .fdescription.required {
+    display: none;
+}
+
+#block_tutorlink_output {
+    background-color: #EEEEEE;
+    border: 1px solid #848484;
+    z-index: 10000 !important;
+}
+
+#block_tutorlink_output .heading {
+    font-size: 1em;
+}
+
+#block_tutorlink_output .yui3-widget-hd {
+    float: right;
+    margin: 3px 3px 0 0;
+}
+
+#block_tutorlink_output .yui3-widget-bd {
+    border-top: 1px solid #EEEEEE;
+    margin: 0 1em 1em;
+}

@@ -41,20 +41,12 @@ class block_tutorlink extends block_base {
        $jsmodule = array(
             'name'  =>  'block_tutorlink',
             'fullpath'  =>  '/blocks/tutorlink/module.js',
-            'requires'  =>  array('base', 'node', 'json', 'io', 'uploader', 'overlay')
-       );
-
-       $jsdata = array(
-           'courseid'   =>  $this->page->course->id,
-           'userid'     =>  $USER->id,
-           'sesskey'    =>  $USER->sesskey,
-           'sname'  =>  session_name(),
-           'sid'    =>  session_id()
+            'requires'  =>  array('base', 'node', 'io', 'overlay')
        );
        
        $this->page->requires->string_for_js('upload', 'moodle');
        $this->page->requires->string_for_js('pluginname', 'block_tutorlink');
-       //$this->page->requires->js_init_call('M.block_tutorlink.init', $jsdata, false, $jsmodule);
+       $this->page->requires->js_init_call('M.block_tutorlink.init', null, false, $jsmodule);
 
        return $this->content;
     }

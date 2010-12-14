@@ -20,17 +20,17 @@ class block_tutorlink_handler {
         global $USER;
         if (is_file($this->filename)) {
             if (!$file = fopen($this->filename, 'r')) {
-                throw new tutorlink_exception('cantreadcsv');
+                throw new tutorlink_exception('cantreadcsv', '', 500);
             }
         } else {
             $fs = get_file_storage();
             $context = get_context_instance(CONTEXT_USER, $USER->id);
             if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $this->filename, 'id DESC', false)) {
-                throw new tutorlink_exception('cantreadcsv');
+                throw new tutorlink_exception('cantreadcsv', '', 500);
             }
             $file = reset($files);
             if (!$file = $file->get_content_file_handle()) {
-                throw new tutorlink_exception('cantreadcsv');
+                throw new tutorlink_exception('cantreadcsv', '', 500);
             }
         }
         return $file;
@@ -42,10 +42,10 @@ class block_tutorlink_handler {
         while ($csvrow = fgetcsv($file)) {
             $line++;
             if (count($csvrow) < 3) {
-                throw new tutorlink_exception('toofewcols', $line);
+                throw new tutorlink_exception('toofewcols', $line, 415);
             }
             if (count($csvrow) > 3) {
-                throw new tutorlink_exception('toomanycols', $line);
+                throw new tutorlink_exception('toomanycols', $line, 415);
             }
         }
         fclose($file);
@@ -118,7 +118,10 @@ class block_tutorlink_handler {
 }
 
 class tutorlink_exception extends moodle_exception {
-    public function __construct($errorcode, $a) {
+    public $http;
+
+    public function __construct($errorcode, $a, $http) {
         parent::__construct($errorcode, 'block_tutorlink', '', $a);
+        $this->http = $http;
     }
 }
