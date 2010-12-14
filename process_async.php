@@ -1,4 +1,11 @@
 <?php
+
+// If the request doesn't come from the SWFUploader widget, pretend the page isn't here
+//if ($_SERVER['HTTP_USER_AGENT'] != 'Shockwave Flash') {
+//    header('HTTP/1.1 404');
+//    exit();
+//}
+
 // Slightly embarassing, but lets us verify the user's sesskey, so worth it.
 $_COOKIE[$_POST['sname']] = $_POST['sid'];
 
@@ -9,11 +16,11 @@ require_once($CFG->dirroot.'/blocks/tutorlink/locallib.php');
 try {
     $userid = optional_param('userid', 0, PARAM_INT);
     if (!$userid) {
-        throw new Exception(get_string('missingparam', '', 'userid'), 400);
+        throw new Exception(get_string('missingparam', 'error', 'userid'), 400);
     }
     $sesskey = optional_param('sesskey', 0, PARAM_ALPHANUM);
     if (!$sesskey) {
-        throw new Exception(get_string('missingparam', '', 'sesskey'), 400);
+        throw new Exception(get_string('missingparam', 'error', 'sesskey'), 400);
     }
     if (!in_array('Filedata', $_FILES['Filedata'])) {
         throw new Exception(get_string('nofile'), 400);

@@ -38,7 +38,7 @@ M.block_tutorlink = {
             }
         });
 
-        this.uploader.on('uploadcompletedata', function(e) {
+        this.uploader.on('uploadCompleteData', function(e) {
             M.block_tutorlink.show_response(e.data);
         });
 
