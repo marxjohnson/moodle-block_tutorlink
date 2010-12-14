@@ -1,16 +1,64 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/**
+ * Define the tutorlink block's class
+ *
+ * @package    blocks
+ * @subpackage  tutorlink
+ * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
+ * @copyright   2010 Tauntons College, UK
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
+ * Tutorlink Block's class
+ */
 class block_tutorlink extends block_base {
 
+    /**
+     * Set the title
+     */
     function init() {
         $this->title = get_string('pluginname', 'block_tutorlink');
     }
 
+    /**
+     * Set where the block should be allowed to be added
+     *
+     * This block is an admin tool, so site and my moodle pages should be fine.
+     *
+     * @return array
+     */
     function applicable_formats() {
         return array('site' => true,'my' => true);
     }
-    function has_config() {return true;}
 
+    /**
+     * Generate the contents for the block
+     *
+     * Check if there has been a tutor role set. If there has, display the form
+     * for choosing a file. If not, display a message with a link to the
+     * settings page. Also initaliases Javascript for asynchronous processing.
+     *
+     * @global object $CFG Global config object
+     * @global object $USER Current user record
+     * @return object Block contents and footer
+     */
     function get_content () {
         if ($this->content !== null) {
             return $this->content;
@@ -20,7 +68,6 @@ class block_tutorlink extends block_base {
         $this->content->text='';
         global $CFG;
         global $USER;
-        global $OUTPUT;
         $context = get_context_instance(CONTEXT_SYSTEM);
        //only let people with permission use the block- everyone else will get an empty string
        if (has_capability('block/tutorlink:use', $context)) {
@@ -51,6 +98,16 @@ class block_tutorlink extends block_base {
        return $this->content;
     }
 
+    /**
+     * Cron Function - checks for existence of cron file, and processes
+     *
+     * If the cron file exists, it is validated and processed.  If specified, it
+     * is then moved to a folder for processed files, otherwise it's deleted.
+     * Old processed files which are no longer needed are then deleted.
+     *
+     * @global object $CFG Global config object
+     * @return bool
+     */
     function cron() {
 
         global $CFG;
@@ -82,6 +139,8 @@ class block_tutorlink extends block_base {
                     } else {
                         $report[] = get_string('nodir', 'block_tutorlink', $cfg_tutorlink->cronprocessed);
                     }
+                } else {
+                    unlink($cfg_tutorlink->cronfile);
                 }
 
                 if ($cfg_tutorlink->keepprocessedfor > 0) {
