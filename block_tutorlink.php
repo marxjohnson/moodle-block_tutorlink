@@ -167,7 +167,7 @@ class block_tutorlink extends block_base {
                 //email outcome to admin
                 $email = implode("\n", $report);
             } catch (tutorlink_exception $e) {
-                $message = get_string($e->errorcode, $e->component, $e->a);
+                $message = get_string($e->errorcode, $e->module, $e->a);
                 $email = $message;
                 $report[] = $message;
             }
