@@ -1,43 +1,18 @@
-#tutorlink_selectfile {
-    background-color: #ddd;
-    margin-left: 0.2em;
-    padding: 0.1em;
+.block_tutorlink fieldset div {
+    margin: 0px !important;
 }
 
-.block_tutorlink .fakefile {
-    width: 110px;
+.block_tutorlink .felement {
+    width: 65% !important;
+    margin-left: 33% !important;
 }
 
-.block_tutorlink .button {
-    color: black;
-    background-color: #ddd;
-    border-style: solid;
-    border-width: 2px;
-    padding-left: 0.1em;
-    padding-right: 0.1em;
-    border-bottom-color: gray;
-    border-right-color: gray;
-    border-top-color: #ddd;
-    border-left-color: #ddd;
-    margin-top: 0.1em;
+.block_tutorlink .fitemtitle {
+    width: 30% !important;
 }
 
-.block_tutorlink .button:hover {
-    color: black;
-    text-decoration: none;
-}
-
-.block_tutorlink .button:active {
-    border-top-color: gray;
-    border-left-color: gray;
-    border-bottom-color: #ddd;
-    border-right-color: #ddd;
-}
-
-.block_tutorlink .flashbutton {
-    width: 45px;
-    height: 19px;
-    float: right;
+.block_tutorlink .fdescription.required {
+    display: none;
 }
 
 #block_tutorlink_output {
