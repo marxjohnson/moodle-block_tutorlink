@@ -25,6 +25,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-        $plugin->version = 2010120700;
-        $plugin->cron = 300;
-?>
+$plugin->version = 2010120700;
+$plugin->cron = 300;
+$plugin->requires = 2010112400;
+$plugin->component = 'block_tutorlink';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '2.0 (Build: 2010120700);
