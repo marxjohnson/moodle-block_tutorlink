@@ -29,4 +29,4 @@ $plugin->cron = 300;
 $plugin->requires = 2010112400;
 $plugin->component = 'block_tutorlink';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '2.0 (Build: 2010120700);
+$plugin->release = '2.0 (Build: 2010120700)';
