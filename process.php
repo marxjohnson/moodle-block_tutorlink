@@ -18,8 +18,7 @@
 /**
  * Handles submission of the tutorlink block's form and processes the file
  *
- * @package    blocks
- * @subpackage  tutorlink
+ * @package    block_tutorlink
  * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
  * @copyright   2010 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -50,7 +49,7 @@ try {
         }
 
         // Make sure that there is a tutorrole configured before we go assigning it
-        if (get_config('block/tutorlink','tutorrole') === false) {
+        if (get_config('block/tutorlink', 'tutorrole') === false) {
             throw new tutorlink_exception('notutorrole', '', 500);
         } else {
             // Validate and process the file
@@ -83,5 +82,3 @@ try {
         print_error($e->errorcode, $e->module, '', $e->a);
     }
 }
-
-?>

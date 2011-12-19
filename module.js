@@ -17,8 +17,7 @@
 /**
  * Defines tutorlink block's Javascript methods
  *
- * @package    blocks
- * @subpackage  tutorlink
+ * @package    block_tutorlink
  * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
  * @copyright   2010 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -41,7 +40,9 @@ M.block_tutorlink = {
         this.Y = Y;
         // Create an overlay (like the ones that Help buttons display) for
         // showing output from asynchronous call.
-        this.overlay_close = Y.Node.create('<a id="block_tutorlink_output_header" href="#"><img  src="'+M.util.image_url('t/delete', 'moodle')+'" /></a>');        
+        html = '<a id="block_tutorlink_output_header" href="#">'
+            +'<img src="'+M.util.image_url('t/delete', 'moodle')+'" /></a>';
+        this.overlay_close = Y.Node.create(html);
         this.overlay = new Y.Overlay({
             headerContent: this.overlay_close,
             bodyContent: '',
@@ -64,7 +65,8 @@ M.block_tutorlink = {
             Y = M.block_tutorlink.Y;
             e.preventDefault(); // Stops form submitting normally
 
-            M.block_tutorlink.show_response('<img src="'+M.cfg.loadingicon+'" class="spinner" />'); // Display a throbber while we're processing and requesting
+            // Display a throbber while we're processing and requesting
+            M.block_tutorlink.show_response('<img src="'+M.cfg.loadingicon+'" class="spinner" />');
 
             var postdata = ''; // Turn the field values into a query string for the POST request
             form.get('elements').each(function(field) {
@@ -92,7 +94,7 @@ M.block_tutorlink = {
                 }
             });
         });
-    },    
+    },
 
     /**
      * Displays the specifies response in the overlay
@@ -102,8 +104,15 @@ M.block_tutorlink = {
     show_response: function(data) {
         Y = this.Y;
         header = '<h1 class="heading">'+M.util.get_string('pluginname', 'block_tutorlink')+'</h1>';
-        this.overlay.set('bodyContent', Y.Node.create(header+'<p>'+data+'</p>')); // Create a node from the data
-        this.overlay.set("align", {node:Y.one('#id_tutorlink_submit'), points:[Y.WidgetPositionAlign.TL, Y.WidgetPositionAlign.RC]}); // Align the overlay with the submit button
+        // Create a node from the data
+        this.overlay.set('bodyContent', Y.Node.create(header+'<p>'+data+'</p>'));
+        this.overlay.set("align", {
+            node: Y.one('#id_tutorlink_submit'),
+            points: [
+                Y.WidgetPositionAlign.TL,
+                Y.WidgetPositionAlign.RC
+            ]
+        }); // Align the overlay with the submit button
         this.overlay.show(); // Show the overlay
         this.overlay_close.focus();
     },
@@ -115,5 +124,5 @@ M.block_tutorlink = {
         this.overlay.hide();
     }
 
-    
+
 }

@@ -18,8 +18,7 @@
 /**
  * Defines classes for use in the tutorlink block
  *
- * @package    blocks
- * @subpackage  tutorlink
+ * @package    block_tutorlink
  * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
  * @copyright   2010 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -42,7 +41,7 @@ class block_tutorlink_handler {
      *
      * @param string $filename
      */
-    function __construct($filename) {
+    public function __construct($filename) {
         $this->filename = $filename;
     }
 
@@ -57,7 +56,7 @@ class block_tutorlink_handler {
      * @global object $USER
      * @return object File handler
      */
-    function open_file() {
+    public function open_file() {
         global $USER;
         if (is_file($this->filename)) {
             if (!$file = fopen($this->filename, 'r')) {
@@ -66,7 +65,13 @@ class block_tutorlink_handler {
         } else {
             $fs = get_file_storage();
             $context = get_context_instance(CONTEXT_USER, $USER->id);
-            if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $this->filename, 'id DESC', false)) {
+            $files = $fs->get_area_files($context->id,
+                                         'user',
+                                         'draft',
+                                         $this->filename,
+                                         'id DESC',
+                                         false);
+            if (!$files) {
                 throw new tutorlink_exception('cantreadcsv', '', 500);
             }
             $file = reset($files);
@@ -86,7 +91,7 @@ class block_tutorlink_handler {
      * @throws tutorlink_exeption if there are the wrong number of columns
      * @return true on success
      */
-    function validate() {
+    public function validate() {
         $line = 0;
         $file = $this->open_file();
         while ($csvrow = fgetcsv($file)) {
@@ -116,7 +121,7 @@ class block_tutorlink_handler {
      * @param bool $plaintext Return report as plain text, rather than HTML?
      * @return string A report of successes and failures.S
      */
-    function process($plaintext = false) {
+    public function process($plaintext = false) {
         global $DB;
         // Get the block's configuration, so we know the ID of the role we're assigning
         $cfg_tutorlink = get_config('block/tutorlink');
@@ -145,7 +150,7 @@ class block_tutorlink_handler {
             $strings->line = $line;
             $strings->op = $op;
 
-            // Need to check the line is valid. If not, add a message to the 
+            // Need to check the line is valid. If not, add a message to the
             // report and skip the line.
 
             // Check we've got a valid operation
@@ -160,7 +165,7 @@ class block_tutorlink_handler {
             }
             // Check the user we're assigning to exists
             if (!$student = $DB->get_record('user', array('idnumber' => $student_idnum))) {
-                $report[] = get_string('tuteenotfound','block_tutorlink', $strings);
+                $report[] = get_string('tuteenotfound', 'block_tutorlink', $strings);
                 continue;
             }
 
@@ -168,25 +173,30 @@ class block_tutorlink_handler {
             $strings->tutor = fullname($tutor);
             $studentcontext = get_context_instance(CONTEXT_USER, $student->id);
 
+            $tutorparams = array(
+                'contextid' => $studentcontext->id,
+                'userid' => $tutor->id,
+                'roleid' => $cfg_tutorlink->tutorrole
+            );
             if ($op == 'del') {
                 // If we're deleting, check the tutor is already assigned to the
                 // student, and remove the assignment.  Skip the line if they're
                 // not.
-                if ($DB->get_record('role_assignments', array('contextid' => $studentcontext->id, 'userid' => $tutor->id, 'roleid' => $cfg_tutorlink->tutorrole))) {
+                if ($DB->get_record('role_assignments', $tutorparams)) {
                     role_unassign($cfg_tutorlink->tutorrole, $tutor->id, $studentcontext->id);
-                    $report[] =  get_string('reldeleted','block_tutorlink', $strings);
+                    $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
                 } else {
                     $report[] =  get_string('reldoesntexist', 'block_tutorlink', $strings);
                 }
             } else {
                 // If we're adding, check that the tutor is not already assigned
                 // to the student, and add them. Skip the line if they are.
-                if ($DB->get_record('role_assignments', array('contextid' => $studentcontext->id, 'userid' => $tutor->id, 'roleid' => $cfg_tutorlink->tutorrole))) {
-                    $report[] = get_string('relalreadyexists','block_tutorlink', $strings);
+                if ($DB->get_record('role_assignments', $tutorparams)) {
+                    $report[] = get_string('relalreadyexists', 'block_tutorlink', $strings);
                 } else if (role_assign($cfg_tutorlink->tutorrole, $tutor->id, $studentcontext->id)) {
-                    $report[] = get_string('reladded','block_tutorlink', $strings);
+                    $report[] = get_string('reladded', 'block_tutorlink', $strings);
                 } else {
-                    $report[] = get_string('reladderror','block_tutorlink', $strings);
+                    $report[] = get_string('reladderror', 'block_tutorlink', $strings);
                 }
             }
         }

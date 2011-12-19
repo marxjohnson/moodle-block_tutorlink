@@ -18,8 +18,7 @@
 /**
  * Define the tutorlink block's class
  *
- * @package    blocks
- * @subpackage  tutorlink
+ * @package    block_tutorlink
  * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
  * @copyright   2010 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -33,7 +32,7 @@ class block_tutorlink extends block_base {
     /**
      * Set the title
      */
-    function init() {
+    public function init() {
         $this->title = get_string('pluginname', 'block_tutorlink');
     }
 
@@ -44,8 +43,8 @@ class block_tutorlink extends block_base {
      *
      * @return array
      */
-    function applicable_formats() {
-        return array('site' => true,'my' => true);
+    public function applicable_formats() {
+        return array('site' => true, 'my' => true);
     }
 
     /**
@@ -59,43 +58,45 @@ class block_tutorlink extends block_base {
      * @global object $USER Current user record
      * @return object Block contents and footer
      */
-    function get_content () {
+    public function get_content () {
         if ($this->content !== null) {
             return $this->content;
         }
-        
+
         $this->content->footer='';
         $this->content->text='';
         global $CFG;
         global $USER;
         $context = get_context_instance(CONTEXT_SYSTEM);
-       //only let people with permission use the block- everyone else will get an empty string
-       if (has_capability('block/tutorlink:use', $context)) {
+        //only let people with permission use the block- everyone else will get an empty string
+        if (has_capability('block/tutorlink:use', $context)) {
             //check that there is a tutor role configure
-            if (get_config('block/tutorlink','tutorrole') === false) {
-                $url = new moodleurl('/admin/settings.php', array('section' => 'blocksettingtutorlink'));
+            if (get_config('block/tutorlink', 'tutorrole') === false) {
+                $urlparams = array('section' => 'blocksettingtutorlink');
+                $url = new moodleurl('/admin/settings.php', $urlparams);
                 $this->content->text .= get_string('notutorrole', 'block_tutorlink');
-                $this->content->text .= html_writer::tag('a', get_string('blocksettings', 'block_tutorlink'), array('href' => $url->out(false)));
-            } else {          
+                $strsettings = get_string('blocksettings', 'block_tutorlink');
+                $this->content->text .= html_writer::tag('a', $strsettings, array('href' => $url));
+            } else {
                 require_once($CFG->dirroot.'/blocks/tutorlink/block_tutorlink_form.php');
                 $url = new moodle_url('/blocks/tutorlink/process.php');
                 $mform = new block_tutorlink_form($url->out());
                 $form = $mform->display();
-                $this->content->text.= $form;            
+                $this->content->text.= $form;
             }
-       }
+        }
 
-       $jsmodule = array(
+        $jsmodule = array(
             'name'  =>  'block_tutorlink',
             'fullpath'  =>  '/blocks/tutorlink/module.js',
             'requires'  =>  array('base', 'node', 'io', 'overlay')
-       );
-       
-       $this->page->requires->string_for_js('upload', 'moodle');
-       $this->page->requires->string_for_js('pluginname', 'block_tutorlink');
-       $this->page->requires->js_init_call('M.block_tutorlink.init', null, false, $jsmodule);
+        );
 
-       return $this->content;
+        $this->page->requires->string_for_js('upload', 'moodle');
+        $this->page->requires->string_for_js('pluginname', 'block_tutorlink');
+        $this->page->requires->js_init_call('M.block_tutorlink.init', null, false, $jsmodule);
+
+        return $this->content;
     }
 
     /**
@@ -108,28 +109,29 @@ class block_tutorlink extends block_base {
      * @global object $CFG Global config object
      * @return bool
      */
-    function cron() {
+    public function cron() {
 
         global $CFG;
         require_once($CFG->dirroot.'/blocks/tutorlink/locallib.php');
-        
+
         $cfg_tutorlink = get_config('block/tutorlink');
 
         if (is_file($cfg_tutorlink->cronfile)) {
             $report = array();
             $handler = new block_tutorlink_handler($cfg_tutorlink->cronfile);
             try {
-                $handler->validate();            
+                $handler->validate();
                 //process file
                 $report = explode("\n", $handler->process(true));
+                $procdir = $cfg_tutorlink->cronprocessed;
 
                 if ($cfg_tutorlink->keepprocessed) {
-                    if (is_dir($cfg_tutorlink->cronprocessed) && is_writable($cfg_tutorlink->cronprocessed)) {
+                    if (is_dir($procdir) && is_writable($procdir)) {
                         //move the processed file to prevent wasted time re-processing
                         $date = date('Ymd');
                         $filenames = new stdClass;
                         $filenames->old = $cfg_tutorlink->cronfile;
-                        $filenames->new = $cfg_tutorlink->cronprocessed.'/'.basename($cfg_tutorlink->cronfile).'.'.$date;
+                        $filenames->new = $procdir.'/'.basename($cfg_tutorlink->cronfile).'.'.$date;
 
                         if (rename($filenames->old, $filenames->new)) {
                             $report[] = get_string('cronmoved', 'block_tutorlink', $filenames);
@@ -137,7 +139,7 @@ class block_tutorlink extends block_base {
                             $report[] = get_string('cronnotmoved', 'block_tutorlink', $filenames);
                         }
                     } else {
-                        $report[] = get_string('nodir', 'block_tutorlink', $cfg_tutorlink->cronprocessed);
+                        $report[] = get_string('nodir', 'block_tutorlink', $procdir);
                     }
                 } else {
                     unlink($cfg_tutorlink->cronfile);
@@ -145,17 +147,20 @@ class block_tutorlink extends block_base {
 
                 if ($cfg_tutorlink->keepprocessedfor > 0) {
                     $removed = 0;
-                    $processed = scandir($cfg_tutorlink->cronprocessed);
+                    $processed = scandir($procdir);
                     foreach ($processed as $processed) {
-                        if (is_file($cfg_tutorlink->cronprocessed.'/'.$processed)) {
-                            $path_parts = pathinfo($cfg_tutorlink->cronprocessed.'/'.$processed);
+                        if (is_file($procdir.'/'.$processed)) {
+                            $path_parts = pathinfo($procdir.'/'.$processed);
                             $ext = $path_parts['extension'];
                             $threshold = date('Ymd', time()-($cfg_tutorlink->keepprocessedfor*86400));
-                            if ($path_parts['filename'] == basename($cfg_tutorlink->cronfile) && $ext < $threshold) {
-                                if (unlink($cfg_tutorlink->cronprocessed.'/'.$processed)) {
+                            $istutorlinkfile = $path_parts['filename'] == basename($cfg_tutorlink->cronfile);
+                            if ($istutorlinkfile && $ext < $threshold) {
+                                if (unlink($procdir.'/'.$processed)) {
                                     $removed++;
                                 } else {
-                                    $report[] = get_string('cantremoveold', 'block_tutorlink', $cfg_tutorlink->cronprocessed.'/'.$processed);
+                                    $report[] = get_string('cantremoveold',
+                                                           'block_tutorlink',
+                                                           $procdir.'/'.$processed);
                                 }
                             }
                         }
@@ -171,17 +176,18 @@ class block_tutorlink extends block_base {
                 $email = $message;
                 $report[] = $message;
             }
-            email_to_user(get_admin(), get_admin(), get_string('tutorlink_log','block_tutorlink'), $email);
-            foreach($report as $line) {
+            email_to_user(get_admin(),
+                          get_admin(),
+                          get_string('tutorlink_log', 'block_tutorlink'),
+                          $email);
+            foreach ($report as $line) {
                 mtrace($line);
             }
         } else {
             mtrace(get_string('nocronfile', 'block_tutorlink'));
         }
         return true;
-        
+
     }
 
-
-}    
-?>
+}

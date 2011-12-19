@@ -18,8 +18,7 @@
 /**
  * Set the version number and cron interval for tutorlink
  *
- * @package    blocks
- * @subpackage  tutorlink
+ * @package    block_tutorlink
  * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
  * @copyright   2010 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
