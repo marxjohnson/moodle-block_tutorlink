@@ -124,7 +124,7 @@ class block_tutorlink_handler {
     public function process($plaintext = false) {
         global $DB;
         // Get the block's configuration, so we know the ID of the role we're assigning
-        $cfg_tutorlink = get_config('block/tutorlink');
+        $cfg_tutorlink = get_config('block_tutorlink');
         $report = array();
         // Set the newline character
         if ($plaintext) {

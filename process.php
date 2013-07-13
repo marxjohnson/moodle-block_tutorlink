@@ -49,7 +49,7 @@ try {
         }
 
         // Make sure that there is a tutorrole configured before we go assigning it
-        if (get_config('block/tutorlink', 'tutorrole') === false) {
+        if (get_config('block_tutorlink', 'tutorrole') === false) {
             throw new tutorlink_exception('notutorrole', '', 500);
         } else {
             // Validate and process the file

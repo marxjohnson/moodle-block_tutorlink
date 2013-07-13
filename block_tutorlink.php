@@ -36,6 +36,10 @@ class block_tutorlink extends block_base {
         $this->title = get_string('pluginname', 'block_tutorlink');
     }
 
+    public function has_config() {
+        return true;
+    }
+
     /**
      * Set where the block should be allowed to be added
      *
@@ -71,7 +75,7 @@ class block_tutorlink extends block_base {
         //only let people with permission use the block- everyone else will get an empty string
         if (has_capability('block/tutorlink:use', $context)) {
             //check that there is a tutor role configure
-            if (get_config('block/tutorlink', 'tutorrole') === false) {
+            if (get_config('block_tutorlink', 'tutorrole') === false) {
                 $urlparams = array('section' => 'blocksettingtutorlink');
                 $url = new moodleurl('/admin/settings.php', $urlparams);
                 $this->content->text .= get_string('notutorrole', 'block_tutorlink');
@@ -114,7 +118,7 @@ class block_tutorlink extends block_base {
         global $CFG;
         require_once($CFG->dirroot.'/blocks/tutorlink/locallib.php');
 
-        $cfg_tutorlink = get_config('block/tutorlink');
+        $cfg_tutorlink = get_config('block_tutorlink');
 
         if (is_file($cfg_tutorlink->cronfile)) {
             $report = array();
