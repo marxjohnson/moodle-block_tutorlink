@@ -28,17 +28,23 @@ defined('MOODLE_INTERNAL') || die();
 // Only get the roles we're allowed to assign in user contexts
 $where = 'id IN (SELECT roleid FROM {role_context_levels} WHERE contextlevel = ?)';
 $roles = $DB->get_records_select('role', $where, array(CONTEXT_USER));
-$options = array();
-foreach ($roles as $role) {
-    $options[$role->id] = $role->name;
-}
+if (count($roles) > 0) {
+    $options = array();
+    foreach ($roles as $role) {
+        $options[$role->id] = $role->name;
+    }
 
-// Select box for the role the block will assign
-$settings->add(new admin_setting_configselect('block_tutorlink/tutorrole',
-                                            get_string('tutorrole', 'block_tutorlink'),
-                                            get_string('tutorrole_explain', 'block_tutorlink'),
-                                            null,
-                                            $options));
+    // Select box for the role the block will assign
+    $settings->add(new admin_setting_configselect('block_tutorlink/tutorrole',
+                                                get_string('tutorrole', 'block_tutorlink'),
+                                                get_string('tutorrole_explain', 'block_tutorlink'),
+                                                null,
+                                                $options));
+} else {
+    $settings->add(new admin_setting_heading('block_tutorlink/noroles',
+                                                '',
+                                                get_string('noroles', 'block_tutorlink')));
+}
 // Full path of the file on the server to be processed by the cron job.
 $settings->add(new admin_setting_configtext('block_tutorlink/cronfile',
                                           get_string('cronfile', 'block_tutorlink'),

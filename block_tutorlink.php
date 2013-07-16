@@ -80,7 +80,7 @@ class block_tutorlink extends block_base {
             //check that there is a tutor role configure
             if (get_config('block_tutorlink', 'tutorrole') === false) {
                 $urlparams = array('section' => 'blocksettingtutorlink');
-                $url = new moodleurl('/admin/settings.php', $urlparams);
+                $url = new moodle_url('/admin/settings.php', $urlparams);
                 $this->content->text .= get_string('notutorrole', 'block_tutorlink');
                 $strsettings = get_string('blocksettings', 'block_tutorlink');
                 $this->content->text .= html_writer::tag('a', $strsettings, array('href' => $url));

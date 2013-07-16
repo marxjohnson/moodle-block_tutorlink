@@ -48,6 +48,8 @@ $string['musthavefile'] = 'You must select a file';
 $string['nocronfile'] = 'Cron file doesn\'t exist.';
 $string['nodir'] = '{$a} does not exist or is not writable. Please check folder permissions.';
 $string['nopermission'] = 'You do not have permission to upload tutor relationships.';
+$string['noroles'] = 'There are currently no roles assignable in User contexts. You must create such a role
+before this block can be fully configured, otherwise you will not be able to use it!';
 $string['norelforwildstudent'] = 'Tutor {$a->student} has no tutees to remove';
 $string['norelforwildtutor'] = 'Student {$a->student} has no tutors to remove';
 $string['notutorrole'] = 'Before you use this block, you must select a tutor role in the ';
