@@ -37,12 +37,20 @@ class block_tutorlink_handler {
     private $filename;
 
     /**
+     * tutorlink configuration
+     *
+     * @var object
+     */
+    private $cfg;
+
+    /**
      * Constructor, sets the filename
      *
      * @param string $filename
      */
     public function __construct($filename) {
         $this->filename = $filename;
+        $this->cfg = get_config('block_tutorlink');
     }
 
     /**
@@ -124,7 +132,6 @@ class block_tutorlink_handler {
     public function process($plaintext = false) {
         global $DB;
         // Get the block's configuration, so we know the ID of the role we're assigning
-        $cfg_tutorlink = get_config('block_tutorlink');
         $report = array();
         // Set the newline character
         if ($plaintext) {
@@ -144,11 +151,17 @@ class block_tutorlink_handler {
             $line++;
             // Clean idnumbers to prevent sql injection
             $op = clean_param($csvrow[0], PARAM_ALPHANUM);
-            $tutor_idnum = clean_param($csvrow[1], PARAM_ALPHANUM);
-            $student_idnum = clean_param($csvrow[2], PARAM_ALPHANUM);
             $strings = new stdClass;
             $strings->line = $line;
             $strings->op = $op;
+
+            try {
+                $tutor_idnum = $this->clean_wildcard($csvrow[1], $strings);
+                $student_idnum = $this->clean_wildcard($csvrow[2], $strings);
+            } catch (moodle_exception $e) {
+                $report[] = $e->getMessage();
+                continue;
+            }
 
             // Need to check the line is valid. If not, add a message to the
             // report and skip the line.
@@ -158,42 +171,81 @@ class block_tutorlink_handler {
                 $report[] = get_string('invalidop', 'block_tutorlink', $strings);
                 continue;
             }
-            // Check the user we're assigning exists
-            if (!$tutor = $DB->get_record('user', array('idnumber' => $tutor_idnum))) {
-                $report[] = get_string('tutornotfound', 'block_tutorlink', $strings);
-                continue;
-            }
-            // Check the user we're assigning to exists
-            if (!$student = $DB->get_record('user', array('idnumber' => $student_idnum))) {
-                $report[] = get_string('tuteenotfound', 'block_tutorlink', $strings);
-                continue;
-            }
-
-            $strings->student = fullname($student);
-            $strings->tutor = fullname($tutor);
-            $studentcontext = get_context_instance(CONTEXT_USER, $student->id);
 
             $tutorparams = array(
-                'contextid' => $studentcontext->id,
-                'userid' => $tutor->id,
-                'roleid' => $cfg_tutorlink->tutorrole
+                'roleid' => $this->cfg->tutorrole
             );
+
+            // Check the user we're assigning exists
+            if (!($op == 'del' && $tutor_idnum == '*')) {
+                if (!$tutor = $DB->get_record('user', array('idnumber' => $tutor_idnum))) {
+                    $report[] = get_string('tutornotfound', 'block_tutorlink', $strings);
+                    continue;
+                }
+                $strings->tutor = fullname($tutor);
+                $tutorparams['userid'] = $tutor->id;
+            }
+
+            if (!($op == 'del' && $student_idnum == '*')) {
+                // Check the user we're assigning to exists
+                if (!$student = $DB->get_record('user', array('idnumber' => $student_idnum))) {
+                    $report[] = get_string('tuteenotfound', 'block_tutorlink', $strings);
+                    continue;
+                }
+                $strings->student = fullname($student);
+                $studentcontext = context_user::instance($student->id);
+                $tutorparams['contextid'] = $studentcontext->id;
+            }
+
             if ($op == 'del') {
                 // If we're deleting, check the tutor is already assigned to the
                 // student, and remove the assignment.  Skip the line if they're
                 // not.
-                if ($DB->get_record('role_assignments', $tutorparams)) {
-                    role_unassign($cfg_tutorlink->tutorrole, $tutor->id, $studentcontext->id);
-                    $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
+                if ($tutor_idnum == '*') {
+                    if ($assignments = $DB->get_records('role_assignments', $tutorparams)) {
+                        foreach($assignments as $assignment) {
+                            $tutor = $DB->get_record('user', 
+                                array('id' => $assignment->userid));
+                            $strings->tutor = fullname($tutor);
+                            role_unassign($this->cfg->tutorrole, 
+                                          $tutor->id, 
+                                          $studentcontext->id);
+                            $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
+                        }
+                    } else {
+                        $report[] =  get_string('norelforwildtutor', 'block_tutorlink', $strings);
+                    }
+                } else if ($student_idnum == '*') {
+                    if ($assignments = $DB->get_records('role_assignments', $tutorparams)) {
+                        foreach($assignments as $assignment) {
+                            $studentcontext = context::instance_by_id($assignment->contextid);
+                            if ($studentcontext->contextlevel == CONTEXT_USER) {
+                                $student = $DB->get_record('user', 
+                                    array('id' => $studentcontext->instanceid));
+                                $strings->student = fullname($student);
+                                role_unassign($this->cfg->tutorrole, 
+                                              $tutor->id, 
+                                              $studentcontext->id);
+                                $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
+                            }
+                        }
+                    } else {
+                        $report[] =  get_string('norelforwildstudent', 'block_tutorlink', $strings);
+                    }
                 } else {
-                    $report[] =  get_string('reldoesntexist', 'block_tutorlink', $strings);
+                    if ($DB->record_exists('role_assignments', $tutorparams)) {
+                        role_unassign($this->cfg->tutorrole, $tutor->id, $studentcontext->id);
+                        $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
+                    } else {
+                        $report[] =  get_string('reldoesntexist', 'block_tutorlink', $strings);
+                    }
                 }
             } else {
                 // If we're adding, check that the tutor is not already assigned
                 // to the student, and add them. Skip the line if they are.
                 if ($DB->get_record('role_assignments', $tutorparams)) {
                     $report[] = get_string('relalreadyexists', 'block_tutorlink', $strings);
-                } else if (role_assign($cfg_tutorlink->tutorrole, $tutor->id, $studentcontext->id)) {
+                } else if (role_assign($this->cfg->tutorrole, $tutor->id, $studentcontext->id)) {
                     $report[] = get_string('reladded', 'block_tutorlink', $strings);
                 } else {
                     $report[] = get_string('reladderror', 'block_tutorlink', $strings);
@@ -202,6 +254,20 @@ class block_tutorlink_handler {
         }
         fclose($file);
         return implode($nl, $report);
+    }
+
+    private function clean_wildcard($value, $strings) {
+        if (trim($value) == '*') {
+            if ($strings->op != 'del') {
+                throw new moodle_exception('invalidop', 'block_tutorlink', '', $strings);
+            }
+            if (!$this->cfg->wildcarddeletion) {
+                throw new moodle_exception('wildcardisabled', 'block_tutorlink', '', $strings);
+            }
+            return trim($value);
+        } else {
+            return clean_param($value, PARAM_ALPHANUM);
+        }
     }
 }
 

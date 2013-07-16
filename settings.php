@@ -34,7 +34,7 @@ foreach ($roles as $role) {
 }
 
 // Select box for the role the block will assign
-$settings->add(new admin_setting_configselect('block_tutorlink/tutortutorrole',
+$settings->add(new admin_setting_configselect('block_tutorlink/tutorrole',
                                             get_string('tutorrole', 'block_tutorlink'),
                                             get_string('tutorrole_explain', 'block_tutorlink'),
                                             null,
@@ -65,3 +65,10 @@ $settings->add(new admin_setting_configtext('block_tutorlink/keepprocessedfor',
                                           null,
                                           PARAM_INT,
                                           2));
+// Allow wildcard deletion?
+$settings->add(new admin_setting_configcheckbox('block_tutorlink/wildcarddeletion',
+                                          get_string('wildcarddeletion', 'block_tutorlink'),
+                                          get_string('wildcarddeletiondesc', 'block_tutorlink'),
+                                          0,
+                                          1,
+                                          0));
