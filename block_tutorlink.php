@@ -71,13 +71,13 @@ class block_tutorlink extends block_base {
         }
 
         $this->content = new stdClass;
-        
+
         $this->content->footer='';
         $this->content->text='';
         $context = get_context_instance(CONTEXT_SYSTEM);
-        //only let people with permission use the block- everyone else will get an empty string
+        // Only let people with permission use the block- everyone else will get an empty string.
         if (has_capability('block/tutorlink:use', $context)) {
-            //check that there is a tutor role configure
+            // Check that there is a tutor role configure.
             if (get_config('block_tutorlink', 'tutorrole') === false) {
                 $urlparams = array('section' => 'blocksettingtutorlink');
                 $url = new moodle_url('/admin/settings.php', $urlparams);
@@ -121,24 +121,24 @@ class block_tutorlink extends block_base {
         global $CFG;
         require_once($CFG->dirroot.'/blocks/tutorlink/locallib.php');
 
-        $cfg_tutorlink = get_config('block_tutorlink');
+        $cfg = get_config('block_tutorlink');
 
-        if (is_file($cfg_tutorlink->cronfile)) {
+        if (is_file($cfg->cronfile)) {
             $report = array();
-            $handler = new block_tutorlink_handler($cfg_tutorlink->cronfile);
+            $handler = new block_tutorlink_handler($cfg->cronfile);
             try {
                 $handler->validate();
-                //process file
+                // Process file.
                 $report = explode("\n", $handler->process(true));
-                $procdir = $cfg_tutorlink->cronprocessed;
+                $procdir = $cfg->cronprocessed;
 
-                if ($cfg_tutorlink->keepprocessed) {
+                if ($cfg->keepprocessed) {
                     if (is_dir($procdir) && is_writable($procdir)) {
-                        //move the processed file to prevent wasted time re-processing
+                        // Move the processed file to prevent wasted time re-processing.
                         $date = date('Ymd');
                         $filenames = new stdClass;
-                        $filenames->old = $cfg_tutorlink->cronfile;
-                        $filenames->new = $procdir.'/'.basename($cfg_tutorlink->cronfile).'.'.$date;
+                        $filenames->old = $cfg->cronfile;
+                        $filenames->new = $procdir.'/'.basename($cfg->cronfile).'.'.$date;
 
                         if (rename($filenames->old, $filenames->new)) {
                             $report[] = get_string('cronmoved', 'block_tutorlink', $filenames);
@@ -149,18 +149,18 @@ class block_tutorlink extends block_base {
                         $report[] = get_string('nodir', 'block_tutorlink', $procdir);
                     }
                 } else {
-                    unlink($cfg_tutorlink->cronfile);
+                    unlink($cfg->cronfile);
                 }
 
-                if ($cfg_tutorlink->keepprocessedfor > 0) {
+                if ($cfg->keepprocessedfor > 0) {
                     $removed = 0;
                     $processed = scandir($procdir);
                     foreach ($processed as $processed) {
                         if (is_file($procdir.'/'.$processed)) {
-                            $path_parts = pathinfo($procdir.'/'.$processed);
-                            $ext = $path_parts['extension'];
-                            $threshold = date('Ymd', time()-($cfg_tutorlink->keepprocessedfor*86400));
-                            $istutorlinkfile = $path_parts['filename'] == basename($cfg_tutorlink->cronfile);
+                            $parts = pathinfo($procdir.'/'.$processed);
+                            $ext = $parts['extension'];
+                            $threshold = date('Ymd', time()-($cfg->keepprocessedfor*86400));
+                            $istutorlinkfile = $parts['filename'] == basename($cfg->cronfile);
                             if ($istutorlinkfile && $ext < $threshold) {
                                 if (unlink($procdir.'/'.$processed)) {
                                     $removed++;
@@ -176,7 +176,7 @@ class block_tutorlink extends block_base {
                         $report[] = get_string('removedold', 'block_tutorlink', $removed);
                     }
                 }
-                //email outcome to admin
+                // Email outcome to admin.
                 $email = implode("\n", $report);
             } catch (tutorlink_exception $e) {
                 $message = get_string($e->errorcode, $e->module, $e->a);

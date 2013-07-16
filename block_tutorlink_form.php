@@ -36,16 +36,6 @@ require_once($CFG->dirroot.'/lib/formslib.php');
 class block_tutorlink_form extends moodleform {
 
     /**
-     * Constructor, allows form's action to be speficied so it's not handled on
-     * the course page.
-     *
-     * @param string $action
-     */
-    public function __construct($action = null) {
-        parent::moodleform($action);
-    }
-
-    /**
      * Defines the form.  Just adds a filepicker and submit button
      */
     public function definition() {
@@ -70,7 +60,7 @@ class block_tutorlink_form extends moodleform {
      * @return string
      */
     public function display() {
-        //finalize the form definition if not yet done
+        // Finalize the form definition if not yet done.
         if (!$this->_definition_finalized) {
             $this->_definition_finalized = true;
             $this->definition_after_data();

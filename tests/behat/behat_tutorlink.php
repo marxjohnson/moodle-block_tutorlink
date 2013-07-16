@@ -1,4 +1,27 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Defines custom behat steps for tutorlink block
+ *
+ * @package    block_tutorlink
+ * @author      Mark Johnson <mark@barrenfrozenwasteland.com>
+ * @copyright   2013 Mark Johnson
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
@@ -15,11 +38,11 @@ class behat_tutorlink extends behat_base {
      * @Given /^tutorlink has the following settings:$/
      */
     public function tutorlink_has_the_following_settings(TableNode $table) {
-        
+
         if (!$data = $table->getRowsHash()) {
             return;
         }
-        
+
         $steps = array(
             new Given('I am on homepage'),
             new Given('I expand "Site administration" node'),
@@ -33,9 +56,9 @@ class behat_tutorlink extends behat_base {
                 $steps[] = new When('I select "'.$value.'" from "s_block_tutorlink_tutorrole"');
             } else if ($name == "keepprocessed" || $name == 'wildcarddeletion') {
                 if ($value == true) {
-                   $steps[] = new When('I check "s_block_tutorlink_'.$name.'"');
+                    $steps[] = new When('I check "s_block_tutorlink_'.$name.'"');
                 } else {
-                   $steps[] = new When('I uncheck "s_block_tutorlink_'.$name.'"');
+                    $steps[] = new When('I uncheck "s_block_tutorlink_'.$name.'"');
                 }
             } else {
                 $steps[] = new Given('I fill in "s_block_tutorlink_'.$name.'" with "'.$value.'"');
@@ -46,7 +69,7 @@ class behat_tutorlink extends behat_base {
 
         return $steps;
     }
-    
+
     /**
      * Creates a role that's assignable in the user context and
      * sets it as the tutor role.
@@ -67,7 +90,7 @@ class behat_tutorlink extends behat_base {
     }
 
     /**
-     * Creates a file with the given data and runs the cron. 
+     * Creates a file with the given data and runs the cron.
      * A table with | linenumber | operation | tutor_idnum | student_idnum | is expected
      *
      * @When /^the following tutorlink file is processed:$/
@@ -88,15 +111,15 @@ class behat_tutorlink extends behat_base {
             }
             fputcsv($fh, $line);
         }
-        fclose($fh);
 
+        fclose($fh);
 
         $DB->set_field('block', 'lastcron', '0', array('name' => 'tutorlink'));
 
         return array(
             $this->getSession()->visit($CFG->wwwroot.'/admin/cron.php'),
             new Given('I wait until the page is ready')
-        ); 
+        );
     }
 
     /**
@@ -119,7 +142,8 @@ class behat_tutorlink extends behat_base {
             new Given('I expand "Roles" node'),
             new Given('I follow "This user\'s role assignments"'),
             new Then("\"//h4[@class='contextname']/a[text()='User: ".fullname($user2)."']\" \"xpath_element\" should exists"),
-            new Then("I should see \"".$rolename."\" in the \"//h4[@class='contextname']/a[text()='User: ".fullname($user2)."']/../../p\" \"xpath_element\"")
+            new Then("I should see \"".$rolename
+                ."\" in the \"//h4[@class='contextname']/a[text()='User: ".fullname($user2)."']/../../p\" \"xpath_element\"")
         );
     }
 

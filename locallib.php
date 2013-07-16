@@ -131,33 +131,33 @@ class block_tutorlink_handler {
      */
     public function process($plaintext = false) {
         global $DB;
-        // Get the block's configuration, so we know the ID of the role we're assigning
+        // Get the block's configuration, so we know the ID of the role we're assigning.
         $report = array();
-        // Set the newline character
+        // Set the newline character.
         if ($plaintext) {
             $nl = "\n";
         } else {
             $nl = '<br />';
         }
 
-        // Set a counter so we can report line numbers for errors
+        // Set a counter so we can report line numbers for errors.
         $line = 0;
 
-        // Open the file
+        // Open the file.
         $file = $this->open_file();
 
-        // Loop through each row of the file
+        // Loop through each row of the file.
         while ($csvrow = fgetcsv($file)) {
             $line++;
-            // Clean idnumbers to prevent sql injection
+            // Clean idnumbers to prevent sql injection.
             $op = clean_param($csvrow[0], PARAM_ALPHANUM);
             $strings = new stdClass;
             $strings->line = $line;
             $strings->op = $op;
 
             try {
-                $tutor_idnum = $this->clean_wildcard($csvrow[1], $strings);
-                $student_idnum = $this->clean_wildcard($csvrow[2], $strings);
+                $tutoridnum = $this->clean_wildcard($csvrow[1], $strings);
+                $studentidnum = $this->clean_wildcard($csvrow[2], $strings);
             } catch (moodle_exception $e) {
                 $report[] = $e->getMessage();
                 continue;
@@ -166,7 +166,7 @@ class block_tutorlink_handler {
             // Need to check the line is valid. If not, add a message to the
             // report and skip the line.
 
-            // Check we've got a valid operation
+            // Check we've got a valid operation.
             if (!in_array($op, array('add', 'del'))) {
                 $report[] = get_string('invalidop', 'block_tutorlink', $strings);
                 continue;
@@ -176,9 +176,9 @@ class block_tutorlink_handler {
                 'roleid' => $this->cfg->tutorrole
             );
 
-            // Check the user we're assigning exists
-            if (!($op == 'del' && $tutor_idnum == '*')) {
-                if (!$tutor = $DB->get_record('user', array('idnumber' => $tutor_idnum))) {
+            // Check the user we're assigning exists.
+            if (!($op == 'del' && $tutoridnum == '*')) {
+                if (!$tutor = $DB->get_record('user', array('idnumber' => $tutoridnum))) {
                     $report[] = get_string('tutornotfound', 'block_tutorlink', $strings);
                     continue;
                 }
@@ -186,9 +186,9 @@ class block_tutorlink_handler {
                 $tutorparams['userid'] = $tutor->id;
             }
 
-            if (!($op == 'del' && $student_idnum == '*')) {
-                // Check the user we're assigning to exists
-                if (!$student = $DB->get_record('user', array('idnumber' => $student_idnum))) {
+            if (!($op == 'del' && $studentidnum == '*')) {
+                // Check the user we're assigning to exists.
+                if (!$student = $DB->get_record('user', array('idnumber' => $studentidnum))) {
                     $report[] = get_string('tuteenotfound', 'block_tutorlink', $strings);
                     continue;
                 }
@@ -201,30 +201,30 @@ class block_tutorlink_handler {
                 // If we're deleting, check the tutor is already assigned to the
                 // student, and remove the assignment.  Skip the line if they're
                 // not.
-                if ($tutor_idnum == '*') {
+                if ($tutoridnum == '*') {
                     if ($assignments = $DB->get_records('role_assignments', $tutorparams)) {
-                        foreach($assignments as $assignment) {
-                            $tutor = $DB->get_record('user', 
+                        foreach ($assignments as $assignment) {
+                            $tutor = $DB->get_record('user',
                                 array('id' => $assignment->userid));
                             $strings->tutor = fullname($tutor);
-                            role_unassign($this->cfg->tutorrole, 
-                                          $tutor->id, 
+                            role_unassign($this->cfg->tutorrole,
+                                          $tutor->id,
                                           $studentcontext->id);
                             $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
                         }
                     } else {
                         $report[] =  get_string('norelforwildtutor', 'block_tutorlink', $strings);
                     }
-                } else if ($student_idnum == '*') {
+                } else if ($studentidnum == '*') {
                     if ($assignments = $DB->get_records('role_assignments', $tutorparams)) {
-                        foreach($assignments as $assignment) {
+                        foreach ($assignments as $assignment) {
                             $studentcontext = context::instance_by_id($assignment->contextid);
                             if ($studentcontext->contextlevel == CONTEXT_USER) {
-                                $student = $DB->get_record('user', 
+                                $student = $DB->get_record('user',
                                     array('id' => $studentcontext->instanceid));
                                 $strings->student = fullname($student);
-                                role_unassign($this->cfg->tutorrole, 
-                                              $tutor->id, 
+                                role_unassign($this->cfg->tutorrole,
+                                              $tutor->id,
                                               $studentcontext->id);
                                 $report[] =  get_string('reldeleted', 'block_tutorlink', $strings);
                             }

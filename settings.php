@@ -25,7 +25,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-// Only get the roles we're allowed to assign in user contexts
+// Only get the roles we're allowed to assign in user contexts.
 $where = 'id IN (SELECT roleid FROM {role_context_levels} WHERE contextlevel = ?)';
 $roles = $DB->get_records_select('role', $where, array(CONTEXT_USER));
 if (count($roles) > 0) {
@@ -34,7 +34,7 @@ if (count($roles) > 0) {
         $options[$role->id] = $role->name;
     }
 
-    // Select box for the role the block will assign
+    // Select box for the role the block will assign.
     $settings->add(new admin_setting_configselect('block_tutorlink/tutorrole',
                                                 get_string('tutorrole', 'block_tutorlink'),
                                                 get_string('tutorrole_explain', 'block_tutorlink'),
@@ -58,13 +58,13 @@ $settings->add(new admin_setting_configcheckbox('block_tutorlink/keepprocessed',
                                               0,
                                               1,
                                               0));
-// Path of the folder to keep old cron files in (if above is checked)
+// Path of the folder to keep old cron files in (if above is checked).
 $settings->add(new admin_setting_configtext('block_tutorlink/cronprocessed',
                                           get_string('cronprocessed', 'block_tutorlink'),
                                           '',
                                           null,
                                           PARAM_TEXT));
-// How many days to keep old cron files for (if above is checked)
+// How many days to keep old cron files for (if above is checked).
 $settings->add(new admin_setting_configtext('block_tutorlink/keepprocessedfor',
                                           get_string('keepprocessedfor', 'block_tutorlink'),
                                           '',

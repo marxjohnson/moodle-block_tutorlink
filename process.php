@@ -24,12 +24,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-//get DB credentials from config.php
+// Get DB credentials from config.php.
 require_once('../../config.php');
 require_once($CFG->dirroot.'/blocks/tutorlink/locallib.php');
 require_once($CFG->dirroot.'/blocks/tutorlink/block_tutorlink_form.php');
 
-// Find out if this is an asynchronous request
+// Find out if this is an asynchronous request.
 $ajax = $_SERVER['HTTP_X_REQUESTED_WITH'];
 
 $url = '/blocks/tutorlink/process.php';
@@ -43,16 +43,16 @@ $mform = new block_tutorlink_form();
 
 try {
     if ($data = $mform->get_data()) {
-        // Check the user is allowed to use the block
+        // Check the user is allowed to use the block.
         if (!has_capability('block/tutorlink:use', $PAGE->context)) {
             throw new tutorlink_exception('nopermission', '', 401);
         }
 
-        // Make sure that there is a tutorrole configured before we go assigning it
+        // Make sure that there is a tutorrole configured before we go assigning it.
         if (get_config('block_tutorlink', 'tutorrole') === false) {
             throw new tutorlink_exception('notutorrole', '', 500);
         } else {
-            // Validate and process the file
+            // Validate and process the file.
             $handler = new block_tutorlink_handler($data->tutorlink_csvfile);
             $handler->validate();
             $report = $handler->process();
