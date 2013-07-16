@@ -1,0 +1,5 @@
+# Version 2.1
+* Lots of tests
+* Added optional wildcard deletion
+* Support for Moodle 2.4+
+* Better validation of configuration
