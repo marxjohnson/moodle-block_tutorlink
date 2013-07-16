@@ -63,14 +63,17 @@ class block_tutorlink extends block_base {
      * @return object Block contents and footer
      */
     public function get_content () {
+        global $CFG;
+        global $USER;
+
         if ($this->content !== null) {
             return $this->content;
         }
 
+        $this->content = new stdClass;
+        
         $this->content->footer='';
         $this->content->text='';
-        global $CFG;
-        global $USER;
         $context = get_context_instance(CONTEXT_SYSTEM);
         //only let people with permission use the block- everyone else will get an empty string
         if (has_capability('block/tutorlink:use', $context)) {
