@@ -150,7 +150,7 @@ class block_tutorlink_handler {
         while ($csvrow = fgetcsv($file)) {
             $line++;
             // Clean idnumbers to prevent sql injection.
-            $op = clean_param($csvrow[0], PARAM_ALPHANUM);
+            $op = strtolower(clean_param($csvrow[0], PARAM_ALPHANUM));
             $strings = new stdClass;
             $strings->line = $line;
             $strings->op = $op;
